@@ -1,10 +1,10 @@
 {
-  "name": "Chat Codespace",
+  "name": "Chat Codespace with MySQL",
   "dockerComposeFile": ["../docker-compose.yml"],
-  "service": "workspace",
-  "workspaceFolder": "/workspace",
-  "runServices": ["mysql"],
+  "service": "chat",
+  "workspaceFolder": "/app",
+  "runServices": ["mysql", "chat"],
   "shutdownAction": "stopCompose",
-  "postCreateCommand": "pip install -r requirements.txt",
-  "remoteUser": "vscode"
+  "remoteUser": "root",
+  "postCreateCommand": "pip install -r requirements.txt"
 }

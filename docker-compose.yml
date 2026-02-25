@@ -12,12 +12,27 @@ services:
       - mysql-data:/var/lib/mysql
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  workspace:
-    image: mcr.microsoft.com/devcontainers/python:0-3.12
+  chat:
+    build: .
+    container_name: chat-server
+    restart: unless-stopped
+    environment:
+      MYSQL_URI: mysql+pymysql://chatuser:chatpass@mysql:3306/chat
+      FLASK_ENV: production
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql:
+        condition: service_healthy
     volumes:
-      - .:/workspace:cached
-    command: sleep infinity
+      - ./app.py:/app/app.py
+      - ./templates:/app/templates
 
 volumes:
   mysql-data:
