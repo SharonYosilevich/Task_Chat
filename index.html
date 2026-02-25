@@ -1,30 +1,199 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Room</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
   <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #d1fae5 100%);
+      background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: 'Roboto', Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-container {
+      background: rgba(255,255,255,0.85);
+      border-radius: 22px;
+      box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.22);
+      padding: 56px 48px 44px 48px;
+      max-width: 720px;
+      min-width: 420px;
+      width: 100%;
+      margin: 56px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      backdrop-filter: blur(2px);
+      border: 1.5px solid #e0e7ef;
+    }
+    .chat-title {
+      color: #2563eb;
+      font-size: 2.7rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      text-align: center;
+      letter-spacing: 1.5px;
+      text-shadow: 0 2px 8px #b3cfff44;
+    }
+    .chat-subtitle {
+      color: #3b82f6;
+      font-size: 1.25rem;
+      margin-bottom: 24px;
+      text-align: center;
+      text-shadow: 0 1px 4px #b3cfff33;
+    }
+    #chatbox {
+      background: #e0e7ff;
+      border-radius: 10px;
+      border: 1px solid #b6c6e6;
+      min-height: 320px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding: 18px;
+      font-size: 1.1rem;
+      color: #1e293b;
+      margin-bottom: 18px;
+      font-family: 'Roboto Mono', monospace;
+      box-shadow: 0 2px 8px 0 rgba(59, 130, 246, 0.07);
+      white-space: pre-wrap;
+    }
+
+    .msg-timestamp {
+      color: #64748b;
+      font-size: 0.98em;
+      margin-right: 6px;
+    }
+    .msg-username {
+      color: #2563eb;
+      font-weight: bold;
+      margin-right: 4px;
+    }
+    .chat-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+      width: 100%;
+    }
+    .chat-form input[type="text"] {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1px solid #93c5fd;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .chat-form input[type="text"]:focus {
+      border: 1.5px solid #2563eb;
+    }
+    .chat-form input[type="button"] {
+      background: linear-gradient(90deg, #2563eb 60%, #60a5fa 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px 0 rgba(59, 130, 246, 0.10);
+      transition: background 0.2s;
+    }
+    .chat-form input[type="button"]:hover {
+      background: linear-gradient(90deg, #1d4ed8 60%, #3b82f6 100%);
+    }
+    .friendly-message {
+      color: #2563eb;
+      background: #e0e7ff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 1.05rem;
+      font-style: italic;
+      box-shadow: 0 1px 4px 0 rgba(59, 130, 246, 0.07);
+    }
+    @media (max-width: 600px) {
+      .chat-container {
+        padding: 18px 4px 14px 4px;
+        max-width: 98vw;
+        min-width: unset;
+      }
+      .chat-title {
+        font-size: 1.3rem;
+      }
+      #chatbox {
+        min-height: 120px;
+        max-height: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-title">Welcome to Chat Room!</div>
+    <div class="chat-subtitle">Chat with friends in any room. Every room is unique!</div>
+    <div id="room-name" class="room-name" style="text-align:center;font-size:1.1rem;color:#2563eb;font-weight:600;margin-bottom:10px;"></div>
+    <form id="inform" class="chat-form" action="/api/chat" method="POST" autocomplete="off">
+      <input name="username" type="text" placeholder="Your name" maxlength="20" required>
+      <input name="msg" type="text" placeholder="Type a message..." maxlength="120" required>
+      <input id="sendBtn" type="button" value="Send">
+    </form>
+    <pre id="chatbox">Loading chat...</pre>
+  </div>
   <script>
-    function room() {
+    function getRoomName() {
       var room = window.location.href.substring(window.location.href.lastIndexOf('/')+1);
       if (room=='') room = 'general';
-      return "/api/chat/"+room;
+      return room;
     }
-
+    function room() {
+      return "/api/chat/" + getRoomName();
+    }
     function updateChat() {
-      $.get(room(),function(data) {
-        $("#chatbox").text(data);
-        window.setTimeout(updateChat,1500);
+      $.get(room(), function(data) {
+        // Parse each line and format timestamp, username, and message
+        var html = "";
+        var lines = data.split('\n');
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i];
+          // Format: [YYYY-MM-DD HH:MM:SS] username: message
+          var match = line.match(/^\[(.*?)\]\s+(.*?):\s+(.*)$/);
+          if (match) {
+            html += '<span class="msg-timestamp">[' + match[1] + ']</span>';
+            html += '<span class="msg-username">' + match[2] + ':</span> ';
+            html += '<span class="msg-text">' + match[3] + '</span><br>';
+          } else {
+            html += line + '<br>';
+          }
+        }
+        $("#chatbox").html(html);
+        window.setTimeout(updateChat, 1500);
       })
     }
-
     function sendmessage() {
       $.post( room(), $( "#inform" ).serialize() );
+      $("#inform input[name='msg']").val("").focus();
     }
-
     $(document).ready(function() {
       $("#chatbox").text("Loading chat...");
       $("#sendBtn").click(sendmessage)
+      // Set room name above the form
+      var roomDisplay = getRoomName();
+      $("#room-name").text("Room: " + roomDisplay);
       window.setTimeout(updateChat,1500);
     });
-
   </script>
+<<<<<<< HEAD
   
   <body>
     <form id="inform" action="/api/chat" method="POST">
@@ -34,4 +203,7 @@
     </form>
     <pre id="chatbox">Loading...</pre>
   </body>
+=======
+</body>
+>>>>>>> da93030 (new index)
 </html>
