@@ -5,7 +5,7 @@ from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 # Database configuration: set MYSQL_URI environment variable to a MySQL
 # SQLAlchemy URI like: mysql+pymysql://user:pass@host:3306/dbname
@@ -26,7 +26,7 @@ class Message(db.Model):
 @app.route('/<room>')
 def serve_frontend(room):
     # Always return the static index.html, regardless of room
-    return send_file('index.html')
+    return send_file('templates/index.html')
 
 # 3. GET /api/chat/<room> - Return chat history for a room
 @app.route('/api/chat/<room>', methods=['GET', 'POST'])
