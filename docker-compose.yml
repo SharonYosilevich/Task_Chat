@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: example_root_pw
+      MYSQL_DATABASE: chat
+      MYSQL_USER: chatuser
+      MYSQL_PASSWORD: chatpass
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  workspace:
+    image: mcr.microsoft.com/devcontainers/python:0-3.12
+    volumes:
+      - .:/workspace:cached
+    command: sleep infinity
+
+volumes:
+  mysql-data:
